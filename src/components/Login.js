@@ -1,15 +1,56 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import Header from './Header'
+import { ValidData } from '../utils/Validation'
+import { auth } from '../utils/Firebase'
+import {  createUserWithEmailAndPassword,signInWithEmailAndPassword } from "firebase/auth";
+import { useNavigate } from 'react-router-dom';
+
 
 const Login = () => {
+  const navigate  = useNavigate();
     const [ IsSignedIn, setIsSignedIn] = useState(true)
-    const toggleSignIn=()=>{
-            setIsSignedIn(!IsSignedIn)
-            
+    const [errorMessage,seterrorMessage] = useState(null)
+    const toggleSignIn=()=>{ setIsSignedIn(!IsSignedIn)       }
+    const email = useRef(null);
+    const password = useRef(null);
+    const name = useRef(null);
+    const handleSubmit = () =>{
+      const message = ValidData(email.current.value, password.current.value);
+      seterrorMessage(message)
+      if(message) return;
+      if(!IsSignedIn) {
+        createUserWithEmailAndPassword(auth, email.current.value, password.current.value)
+            .then((userCredential) => {
+              // Signed up 
+              const user = userCredential.user;
+              navigate('/browse')
+              // ...
+            })
+            .catch((error) => {
+              const errorCode = error.code;
+              const errorMessage = error.message;
+              seterrorMessage(errorCode+errorMessage)
+              // ..
+            });
+      }else{
+        signInWithEmailAndPassword(auth, email.current.value, password.current.value)
+  .then((userCredential) => {
+    // Signed in 
+    const user = userCredential.user;
+    navigate('/browse')
+    // ...
+  })
+  .catch((error) => {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    seterrorMessage(errorCode+errorMessage)
+  });
+        
+      }
+
     }
   return (
-    <div>
-       
+    <div>     
         <div className='absolute'>
         <Header/>
         <img src="https://assets.nflxext.com/ffe/siteui/vlv3/ab180a27-b661-44d7-a6d9-940cb32f2f4a/f9a24fdc-ab8b-4e19-b0f5-4923356a72de/CA-en-20231009-popsignuptwoweeks-perspective_alpha_website_large.jpg"
@@ -17,16 +58,18 @@ const Login = () => {
         </div>
          
    <div>
-   <form className=' w-3/12 bg-opacity-80 absolute p-12 bg-black text-white my-36 mx-auto right-0 left-0 rounded-md' >
-    <p className='text-3xl py-3  cursor-pointer'>{IsSignedIn?"Sign In" :"Sign Up"}</p>
-    {!IsSignedIn &&     <input className='py-4 my-4 p-6 bg-gray-800 w-full rounded-md te' type="text" placeholder="Full Name"/>
+   <form onSubmit={(e)=>e.preventDefault()} className='absolute left-0 right-0 w-3/12 p-12 mx-auto text-white bg-black rounded-md bg-opacity-80 my-36' >
+    <p className='py-3 text-3xl cursor-pointer'>{IsSignedIn?"Sign In" :"Sign Up"}</p>
+    {!IsSignedIn &&     <input ref={name}className='w-full p-6 py-4 my-4 bg-gray-800 rounded-md te' type="text" placeholder="Full Name"/>
 }
-    <input className='py-4 my-4 bg-gray-800 w-full rounded-md  p-6  ' type="text" placeholder="Email Address"/>
-    <input className='py-4 my-4 bg-gray-800 w-full p-6' type="password" placeholder="Password"/>
-    <button className='py-4 my-4 bg-red-700 w-full'>
+    <input ref={email} className='w-full p-6 py-4 my-4 bg-gray-800 rounded-md ' type="text" placeholder="Email Address"/>
+   
+    <input  ref={password} className='w-full p-6 py-4 my-4 bg-gray-800' type="password" placeholder="Password"/>
+   <p className='text-red-700'>{errorMessage}</p>
+    <button onClick={handleSubmit} className='w-full py-4 my-4 bg-red-700'>
     {IsSignedIn?"Sign In" :"Sign Up"}
     </button>
-<p onClick={toggleSignIn}  className=' cursor-pointer'>{IsSignedIn?"New to Netflix? Sign Up Now":"Already Registered? Sign In" }</p>
+<p onClick={toggleSignIn}  className='cursor-pointer '>{IsSignedIn?"New to Netflix? Sign Up Now":"Already Registered? Sign In" }</p>
 
 
 </form>
