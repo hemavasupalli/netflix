@@ -2,12 +2,15 @@ import React, { useRef, useState } from 'react'
 import Header from './Header'
 import { ValidData } from '../utils/Validation'
 import { auth } from '../utils/Firebase'
-import {  createUserWithEmailAndPassword,signInWithEmailAndPassword } from "firebase/auth";
+import {  createUserWithEmailAndPassword,signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { addUser } from '../utils/userSlice';
 
 
 const Login = () => {
   const navigate  = useNavigate();
+  const dispatch = useDispatch();
     const [ IsSignedIn, setIsSignedIn] = useState(true)
     const [errorMessage,seterrorMessage] = useState(null)
     const toggleSignIn=()=>{ setIsSignedIn(!IsSignedIn)       }
@@ -23,7 +26,19 @@ const Login = () => {
             .then((userCredential) => {
               // Signed up 
               const user = userCredential.user;
-              navigate('/browse')
+              updateProfile(user, {
+                displayName: name.current.value,
+                 photoURL: "https://lh3.googleusercontent.com/a/ACg8ocLGK-zor-Vw7uQHY4DwFxvMaICMim88XVAK_ZRldG7tkQ=s576-c-no"
+              }).then(() => {
+                const {uid,email , displayName , photoURL} = auth.currentUser;
+                dispatch(addUser({uid:uid ,email:email, displayName:displayName,photoURL:photoURL}));
+                 navigate('/browse')
+               
+                // ...
+              }).catch((error) => {
+                seterrorMessage(error.message)
+              });
+             
               // ...
             })
             .catch((error) => {
@@ -52,7 +67,7 @@ const Login = () => {
   return (
     <div>     
         <div className='absolute'>
-        <Header/>
+       <Header/>
         <img src="https://assets.nflxext.com/ffe/siteui/vlv3/ab180a27-b661-44d7-a6d9-940cb32f2f4a/f9a24fdc-ab8b-4e19-b0f5-4923356a72de/CA-en-20231009-popsignuptwoweeks-perspective_alpha_website_large.jpg"
             alt="background"/> 
         </div>
