@@ -6,6 +6,7 @@ import {  createUserWithEmailAndPassword,signInWithEmailAndPassword, updateProfi
 
 import { useDispatch } from 'react-redux';
 import { addUser } from '../utils/userSlice';
+import { background, usericon } from '../utils/constant';
 
 
 const Login = () => {
@@ -28,8 +29,8 @@ const Login = () => {
               const user = userCredential.user;
               updateProfile(user, {
                 displayName: name.current.value,
-                 photoURL: "https://lh3.googleusercontent.com/a/ACg8ocLGK-zor-Vw7uQHY4DwFxvMaICMim88XVAK_ZRldG7tkQ=s576-c-no"
-              }).then(() => {
+                 photoURL: usericon
+                       }).then(() => {
                 const {uid,email , displayName , photoURL} = auth.currentUser;
                 dispatch(addUser({uid:uid ,email:email, displayName:displayName,photoURL:photoURL}));
                
@@ -68,8 +69,7 @@ const Login = () => {
     <div>     
         <div className='absolute'>
        <Header/>
-        <img src="https://assets.nflxext.com/ffe/siteui/vlv3/ab180a27-b661-44d7-a6d9-940cb32f2f4a/f9a24fdc-ab8b-4e19-b0f5-4923356a72de/CA-en-20231009-popsignuptwoweeks-perspective_alpha_website_large.jpg"
-            alt="background"/> 
+        <img src={background}   alt="background"/> 
         </div>
          
    <div>
